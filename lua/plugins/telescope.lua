@@ -14,3 +14,5 @@ vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Help Tags' })
 
 -- Git files (ignores node_modules, etc.)
 vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = 'Git Files' })
+
+vim.keymap.set('n', '<leader>qf', vim.lsp.buf.code_action, { desc = 'Quick Fix' })

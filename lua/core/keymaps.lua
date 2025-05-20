@@ -30,4 +30,7 @@ vim.keymap.set('n', 'gr', vim.lsp.buf.references, { desc = '[G]oto [R]eferences'
 vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = '[R]e[N]ame symbol' })
 
 -- Format code
-vim.keymap.set('n', '<leader-f>', vim.lsp.buf.format, { desc = '[D]otnet [F]ormat' })
+vim.keymap.set("n", "<leader>f", function()
+	vim.lsp.buf.format({ async = true })
+end, { desc = "[C]ode [F]ormat" })
+

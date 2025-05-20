@@ -1,6 +1,7 @@
 require("mason").setup()
-require("mason-lspconfig").setup()
-
+require("mason-lspconfig").setup({
+  ensure_installed = { "csharp_ls" },
+})
 -- Enable diagnostics with better visuals
 vim.diagnostic.config({
   virtual_text = true,      -- Show inline errors
@@ -28,8 +29,6 @@ vim.cmd [[
   highlight DiagnosticUnderlineHint gui=undercurl guisp=#10B981
 ]]
 
-require("mason").setup()
-require("mason-lspconfig").setup()
 
 -- Set up nvim-cmp.
 local cmp = require("cmp")
@@ -98,46 +97,19 @@ cmp.setup.cmdline(":", {
 
 -- Set up lspconfig
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
+capabilities.textDocument.formatting = true
 
--- Omnisharp configuration
-vim.lsp.enable('omnisharp')
-require('lspconfig').omnisharp.setup {
-  cmd = {
-    "omnisharp",
-    "--languageserver",
-    "--hostPID",
-    tostring(vim.fn.getpid()),
-    "-z",
-    "DotNet:enablePackageRestore=false",
-    "--encoding",
-    "utf-8",
-  },
+local lspconfig = require("lspconfig")
+local util = require 'lspconfig.util'
+
+require('lspconfig').csharp_ls.setup {
+  --capabilities = capabilities,
+  cmd = { 'csharp-ls' },
   root_dir = function(fname)
-    local root_files = {
-      ".sln",
-      ".csproj",
-      "omnisharp.json",
-      "function.json",
-      ".git",
-    }
-    return require("lspconfig.util").root_pattern(unpack(root_files))(fname)
-    or vim.fn.getcwd()
+	  return util.find_git_ancestor(fname) or util.root_pattern('*.sln', '*.csproj')(fname)
   end,
-  enable_roslyn_analyzers = true,
-  enable_import_completion = true,
-  organize_imports_on_format = true,
-  enable_decompilation_support = true,
-  settings = {
-    FormattingOptions = {
-      EnableEditorConfigSupport = true,
-      OrganizeImports = true,
+  filetypes = { 'cs' }, 
+  init_options = {
+	  AutomaticWorkspaceInit = true,
     },
-    MsBuild = {
-      LoadProjectsOnDemand = false,
-    },
-    RoslynExtensionsOptions = {
-      EnableAnalyzersSupport = true,
-      EnableImportCompletion = true,
-    },
-  },
-}
+  }
