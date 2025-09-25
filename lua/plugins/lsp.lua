@@ -1,20 +1,21 @@
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = { "csharp_ls" },
+	ensure_installed = { "csharp_ls", },
+	automatic_enable = false,
 })
 -- Enable diagnostics with better visuals
 vim.diagnostic.config({
-  virtual_text = true,      -- Show inline errors
-  signs = true,            -- Show signs in the gutter
-  underline = true,        -- Underline errors
-  update_in_insert = false, -- Don't update while typing
-  severity_sort = true,    -- Sort diagnostics by severity
-  float = {               -- Configuration for floating window
-    border = "rounded",   -- Rounded border
-    source = "always",    -- Show source of diagnostic
-    header = "",          -- No header
-    prefix = "",          -- No prefix
-  },
+	virtual_text = true,   -- Show inline errors
+	signs = true,          -- Show signs in the gutter
+	underline = true,      -- Underline errors
+	update_in_insert = false, -- Don't update while typing
+	severity_sort = true,  -- Sort diagnostics by severity
+	float = {              -- Configuration for floating window
+		border = "rounded", -- Rounded border
+		source = "always", -- Show source of diagnostic
+		header = "",       -- No header
+		prefix = "",       -- No prefix
+	},
 })
 
 -- Set highlight colors for diagnostics
@@ -35,64 +36,64 @@ local cmp = require("cmp")
 local luasnip = require("luasnip")
 
 cmp.setup({
-  snippet = {
-    expand = function(args)
-      require("luasnip").lsp_expand(args.body)
-    end,
-  },
-  window = {
-    -- completion = cmp.config.window.bordered(),
-    -- documentation = cmp.config.window.bordered(),
-  },
-  mapping = cmp.mapping.preset.insert({
-    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-    ["<C-f>"] = cmp.mapping.scroll_docs(4),
-    ["<C-Space>"] = cmp.mapping.complete(),
-    ["<C-e>"] = cmp.mapping.abort(),
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
-    ["<Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-    ["<S-Tab>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-  }),
-  sources = cmp.config.sources({
-    { name = "nvim_lsp" },
-    { name = "luasnip" },
-  }, {
-    { name = "buffer" },
-  }),
+	snippet = {
+		expand = function(args)
+			require("luasnip").lsp_expand(args.body)
+		end,
+	},
+	window = {
+		-- completion = cmp.config.window.bordered(),
+		-- documentation = cmp.config.window.bordered(),
+	},
+	mapping = cmp.mapping.preset.insert({
+		["<C-b>"] = cmp.mapping.scroll_docs(-4),
+		["<C-f>"] = cmp.mapping.scroll_docs(4),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<C-e>"] = cmp.mapping.abort(),
+		["<CR>"] = cmp.mapping.confirm({ select = true }),
+		["<Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_next_item()
+			elseif luasnip.expand_or_jumpable() then
+				luasnip.expand_or_jump()
+			else
+				fallback()
+			end
+		end, { "i", "s" }),
+		["<S-Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_prev_item()
+			elseif luasnip.jumpable(-1) then
+				luasnip.jump(-1)
+			else
+				fallback()
+			end
+		end, { "i", "s" }),
+	}),
+	sources = cmp.config.sources({
+		{ name = "luasnip" },
+		{ name = "nvim_lsp" },
+	}, {
+		{ name = "buffer" },
+	}),
 })
 
 -- Set configuration for cmdline
 cmp.setup.cmdline({ "/", "?" }, {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = {
-    { name = "buffer" },
-  },
+	mapping = cmp.mapping.preset.cmdline(),
+	sources = {
+		{ name = "buffer" },
+	},
 })
 
 cmp.setup.cmdline(":", {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = cmp.config.sources({
-    { name = "path" },
-  }, {
-    { name = "cmdline" },
-  }),
-  matching = { disallow_symbol_nonprefix_matching = false },
+	mapping = cmp.mapping.preset.cmdline(),
+	sources = cmp.config.sources({
+		{ name = "path" },
+	}, {
+		{ name = "cmdline" },
+	}),
+	matching = { disallow_symbol_nonprefix_matching = false },
 })
 
 -- Set up lspconfig
@@ -102,14 +103,35 @@ capabilities.textDocument.formatting = true
 local lspconfig = require("lspconfig")
 local util = require 'lspconfig.util'
 
-require('lspconfig').csharp_ls.setup {
-  --capabilities = capabilities,
-  cmd = { 'csharp-ls' },
-  root_dir = function(fname)
-	  return util.find_git_ancestor(fname) or util.root_pattern('*.sln', '*.csproj')(fname)
-  end,
-  filetypes = { 'cs' }, 
-  init_options = {
-	  AutomaticWorkspaceInit = true,
-    },
-  }
+lspconfig.csharp_ls.setup {
+	--capabilities = capabilities,
+	cmd = { 'csharp-ls' },
+	root_dir = function(fname)
+		return util.find_git_ancestor(fname) or util.root_pattern('*.sln', '*.csproj')(fname)
+	end,
+	filetypes = { 'cs' },
+	init_options = {
+		AutomaticWorkspaceInit = true,
+	},
+}
+
+require("csharpls_extended").buf_read_cmd_bind()
+
+lspconfig.lua_ls.setup {
+	capabilities = capabilities,
+	cmd = { 'lua-language-server' },
+	settings = {
+		Lua = {
+			workspace = {
+				checkThirdParty = false,
+				libray = vim.api.nvim_get_runtime_file("", true),
+			},
+			telemetry = {
+				enable = false,
+			},
+			diagnostics = {
+				globals = { 'vim' },
+			},
+		},
+	},
+}
