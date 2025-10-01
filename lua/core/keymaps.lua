@@ -33,4 +33,3 @@ vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, { desc = '[R]e[N]ame symbo
 vim.keymap.set("n", "<leader>f", function()
 	vim.lsp.buf.format({ async = true })
 end, { desc = "[C]ode [F]ormat" })
-

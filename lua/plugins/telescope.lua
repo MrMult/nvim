@@ -2,13 +2,10 @@ local builtin = require('telescope.builtin')
 require("telescope").load_extension("csharpls_definition")
 
 -- File picker
-vim.keymap.set('n', '<leader>ff', function()
-  local git_root = vim.fn.systemlist('git rev-parse --show-toplevel')[1]
-  local cwd = git_root or vim.fn.getcwd()
-  require('telescope.builtin').live_grep({
-    cwd = cwd,
-    prompt_title = 'Git Grep in ' .. vim.fn.fnamemodify(cwd, ':t')
-  })
+vim.keymap.set('n', '<leader>ff', function(opts)
+  opts = opts or {}
+  opts.cwd = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  require'telescope.builtin'.find_files(opts)
 end, { desc = 'Git Grep' })
 
 -- Browse open buffers

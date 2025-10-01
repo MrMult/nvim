@@ -94,6 +94,14 @@ lazy.setup({
 	{
 		'tpope/vim-fugitive',
 	},
+	{
+		'stevearc/resession.nvim',
+		opts = {},
+	},
+	{
+		'nvim-mini/mini.nvim',
+		version = false
+	},
 })
 
 -- Load plugin configurations
@@ -107,3 +115,5 @@ require('plugins.luasnip')
 require('plugins.neoscroll')
 require('plugins.dotnet')
 require('plugins.git')
+require('plugins.ressesion')
+require('plugins.mini-file')
