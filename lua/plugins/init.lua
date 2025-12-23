@@ -102,6 +102,12 @@ lazy.setup({
 		'nvim-mini/mini.nvim',
 		version = false
 	},
+	{
+		"DestopLine/boilersharp.nvim",
+		opts = {
+			-- Your options go here
+		},
+	},
 })
 
 -- Load plugin configurations
@@ -117,3 +123,4 @@ require('plugins.dotnet')
 require('plugins.git')
 require('plugins.ressesion')
 require('plugins.mini-file')
+require("boilersharp").setup()

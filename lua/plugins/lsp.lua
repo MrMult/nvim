@@ -96,24 +96,63 @@ cmp.setup.cmdline(":", {
 	matching = { disallow_symbol_nonprefix_matching = false },
 })
 
+
+vim.api.nvim_create_autocmd('LspAttach', {
+	group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+	callback = function(args)
+		local client = vim.lsp.get_client_by_id(args.data.client_id)
+		local bufnr = args.buf
+
+		-- Check if the server supports signature help
+		if client.server_capabilities.signatureHelpProvider then
+			vim.keymap.set('i', '<C-s>', vim.lsp.buf.signature_help, { buffer = bufnr, desc = 'Trigger signature help' })
+		else
+			print('Signature help is NOT supported.')
+		end
+	end,
+})
+
+-- Create an autocommand group for signature help
+local signature_group = vim.api.nvim_create_augroup("LspSignature", { clear = true })
+
+vim.api.nvim_create_autocmd({ "TextChangedI", "TextChangedP" }, {
+	group = signature_group,
+	pattern = "*",
+	callback = function()
+		local line = vim.fn.getline(".")
+		local col = vim.fn.col(".")
+		local char_before = line:sub(col - 1, col - 1)
+
+		-- Trigger on '(' or ',' character
+		if char_before == "(" or char_before == "," or char_before == " " then
+			vim.defer_fn(function()
+				vim.lsp.buf.signature_help()
+			end, 50)
+		end
+	end,
+})
+
 -- Set up lspconfig
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
-capabilities.textDocument.formatting = true
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+--capabilities.textDocument.formatting = true
 
 local lspconfig = require("lspconfig")
 local util = require 'lspconfig.util'
 
 lspconfig.csharp_ls.setup {
-	--capabilities = capabilities,
+	capabilities = capabilities,
 	cmd = { 'csharp-ls' },
 	root_dir = function(fname)
-		return util.find_git_ancestor(fname) or util.root_pattern('*.sln', '*.csproj')(fname)
+		return util.find_git_ancestor(fname) or util.root_pattern('*.sln')(fname) or util.root_pattern('*.csproj')(fname)
 	end,
 	filetypes = { 'cs' },
 	init_options = {
 		AutomaticWorkspaceInit = true,
+		triggerCharacters = { '(', ',', '<' },
 	},
 }
+
+-- Create an autocmd to check capabilities and set keymaps when LSP attaches
 
 require("csharpls_extended").buf_read_cmd_bind()
 
